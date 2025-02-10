@@ -1,24 +1,29 @@
-// app.js
-
+require('dotenv').config(); // Загружаем переменные окружения
 const express = require('express');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const path = require('path');
-const indexRoute = require('./routes/index'); // підключення маршруту
+const indexRoute = require('./routes/index');
 
 const app = express();
 
-// Підключення до MongoDB Atlas
-const uri = 'mongodb+srv://mablyzniuk:mablyzniuk@margo.rurfz.mongodb.net/?retryWrites=true&w=majority&appName=Margo'; // Вставте сюди ваш URI підключення
+// Подключение к MongoDB
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log('✅ MongoDB connected successfully'))
+    .catch(err => console.error('❌ MongoDB connection error:', err));
 
-mongoose.connect(uri)
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.log('MongoDB connection error:', err));
+// Middleware
+app.use(cors({ credentials: true, origin: 'http://localhost:3000' })); // Разрешаем CORS для фронтенда
+app.use(express.json()); // Обработка JSON
+app.use(cookieParser()); // Работа с cookies
+app.use(express.static(path.join(__dirname, 'public'))); // Подключение статических файлов
 
-// Налаштування маршрутів
-app.use(express.json()); // Для обробки JSON даних
-app.use('/', indexRoute); // Використовуємо маршрути з файлу index.js
+// Используем маршруты
+app.use('/', indexRoute);
 
-const PORT = process.env.PORT || 3001;
+// Запуск сервера
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
